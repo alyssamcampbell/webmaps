@@ -21,33 +21,6 @@ const hjourney = [
     [18.97307603337172, 99.00470953038322] // Chiang Mai
 ];
 
-// Add markers with popups and images for each coordinate on the journey
-const markersh = [];
-const popupTextsh = [
-  'a',
-  'b',
-  'c',
-  'd',
-  'e',
-  'f',
-  'g'
-];
-
-for (let i = 0; i < hjourney.length; i++) {
-  const marker = L.marker(hjourney[i]).addTo(map);
-  marker.bindPopup(popupTextsh[i]);
-
-  const icon = L.icon({
-    iconUrl: imageUrlsh[i],
-    iconSize: [100, 100], // Replace with the desired size of the image
-    popupAnchor: [0, -32] // Adjust the anchor if needed
-  });
-
-  marker.setIcon(icon);
-
-  markersh.push(marker);
-}
-
 
 // Create polylines
 var polyline1 = L.polyline([], { color: '#D3A42E' }).addTo(map);
