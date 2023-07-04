@@ -6,47 +6,52 @@ let basemap_urls = {
 
 L.tileLayer(basemap_urls.watercolor, {
   maxZoom: 19,
-  attribution: '&copy; <a href="">Stamen</a>',
+  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">Stamen</a>',
   opacity: 0.4
 }).addTo(map);
 
 // H JOURNEY
 const hjourney = [
+    [47.63391466771252, -122.52729914415487], // Bainbridge Island
     [47.66159670798355, -122.30817094085475], // Seattle
     [37.80444424121187, -122.43827589048583], // San Francisco
     [40.73112646783126, -73.99780825980085], // New York
+    [40.64338871425513, -73.78867535842312], // New York JFK
+    [32.08807693740594, 34.770466821168405], // Tel Aviv
     [41.00894863216677, 28.97784715618639], // Istanbul 
     [19.088415322843208, 72.87981284881647], // Mumbai
     [12.982770072181893, 77.58974074657802], // Bangalore
+    [11.936883123451027, 79.83069418643692], // Pondicherry
     [18.97307603337172, 99.00470953038322] // Chiang Mai
 ];
 
 
-// Create polylines
+
+// Create an empty polyline
 var polyline1 = L.polyline([], { color: '#D3A42E' }).addTo(map);
-var polyline2 = L.polyline([], { color: '#A57C00' }).addTo(map);
+var polyline2 = L.polyline([], { color: '#008080' }).addTo(map);
 var polyline3 = L.polyline([], { color: '#D31620' }).addTo(map);
 
 // Animate the polylines
-var duration = 2000; // Animation duration in milliseconds
-var steps = 75; // Number of animation steps
+var duration = 1000; // Animation duration in milliseconds
+var steps = 100; // Number of animation steps
 
-// Calculate the incremental points for animation with wave effect
+// Calculate the incremental points for animation with randomly shaped wavy effect
 var animatedPoints1 = [];
 for (var i = 0; i < hjourney.length - 1; i++) {
   var startPoint = L.latLng(hjourney[i]);
   var endPoint = L.latLng(hjourney[i + 1]);
 
-  // Generate parameters for waves
-  var waveAmplitude = .4; 
-  var waveFrequency = .5; 
+  // Generate random parameters for the wavy effect
+  var waveAmplitude = Math.random() * 2; // Random amplitude between 0.01 and 0.04
+  var waveFrequency = Math.random() * 0.3; // Random frequency between 0.1 and 0.3
 
   for (var j = 0; j <= steps; j++) {
     var fraction = j / steps;
     var interpolatedLat = startPoint.lat + (endPoint.lat - startPoint.lat) * fraction;
     var interpolatedLng = startPoint.lng + (endPoint.lng - startPoint.lng) * fraction;
 
-    // Add wavy effect to the coordinates
+    // Add a randomly shaped wavy effect to the coordinates
     var offsetLat = waveAmplitude * Math.sin(waveFrequency * j);
     var offsetLng = waveAmplitude * Math.cos(waveFrequency * j);
 
@@ -55,11 +60,9 @@ for (var i = 0; i < hjourney.length - 1; i++) {
   }
 }
 
-// T JOURNEY
-
-const tJourney = [
+var tJourney = [
     [51.64600598888888, 5.955066303526449], // Boxmeer
-    [53.21949923832306, 6.56289889783151], // Groningen
+    [53.21949923832306, 6.56289889783151], // University of Groningen
     [1.3579334154632876, 103.86004290239082], // Singapore
     [3.148790083268786, 101.73642797810834], // Malaysia
     [18.97307603337172, 99.00470953038322] // Chiang Mai
@@ -70,16 +73,16 @@ for (var i = 0; i < tJourney.length - 1; i++) {
   var startPoint = L.latLng(tJourney[i]);
   var endPoint = L.latLng(tJourney[i + 1]);
 
-  // Generate parameters for the wavy effect
-  var waveAmplitude = .4
-  var waveFrequency = .5
+  // Generate random parameters for the wavy effect
+  var waveAmplitude = Math.random() * 2; // Random amplitude between 0.01 and 0.04
+  var waveFrequency = Math.random() * 0.3; // Random frequency between 0.1 and 0.3
 
   for (var j = 0; j <= steps; j++) {
     var fraction = j / steps;
     var interpolatedLat = startPoint.lat + (endPoint.lat - startPoint.lat) * fraction;
     var interpolatedLng = startPoint.lng + (endPoint.lng - startPoint.lng) * fraction;
 
-    // Add wavy effect to the coordinates
+    // Add a randomly shaped wavy effect to the coordinates
     var offsetLat = waveAmplitude * Math.sin(waveFrequency * j);
     var offsetLng = waveAmplitude * Math.cos(waveFrequency * j);
 
@@ -88,9 +91,7 @@ for (var i = 0; i < tJourney.length - 1; i++) {
   }
 }
 
-// JOURNEY TOGETHER
-
-const betterTogether = [
+var betterTogether = [
   [18.97307603337172, 99.00470953038322], // Chiang Mai
   [19.882883001616815, 102.1254098035767], // Luang Prabang, Laos
   [21.06792375404227, 105.82597765722478], // Hanoi, Vietnam
@@ -112,16 +113,16 @@ for (var i = 0; i < betterTogether.length - 1; i++) {
   var startPoint = L.latLng(betterTogether[i]);
   var endPoint = L.latLng(betterTogether[i + 1]);
 
-  // Generate parameters for the wavy effect
-  var waveAmplitude = .9
-  var waveFrequency = .5
+  // Generate random parameters for the wavy effect
+  var waveAmplitude = 0.02; 
+  var waveFrequency = 0.03
 
   for (var j = 0; j <= steps; j++) {
     var fraction = j / steps;
     var interpolatedLat = startPoint.lat + (endPoint.lat - startPoint.lat) * fraction;
     var interpolatedLng = startPoint.lng + (endPoint.lng - startPoint.lng) * fraction;
 
-    // Add wavy effect to the coordinates
+    // Add a randomly shaped wavy effect to the coordinates
     var offsetLat = waveAmplitude * Math.sin(waveFrequency * j);
     var offsetLng = waveAmplitude * Math.cos(waveFrequency * j);
 
@@ -137,28 +138,22 @@ var index3 = 0;
 var playtJourney = false; // Flag to indicate when to start playing tJourney
 
 function animatePolylines() {
-    var animatePolyline1 = index1 < animatedPoints1.length;
-    var animatePolyline2 = index2 < animatedPoints2.length;
-    
-    if (animatePolyline1) {
-      polyline1.addLatLng(animatedPoints1[index1]);
-      index1++;
-    }
-    
-    if (animatePolyline2) {
-      polyline2.addLatLng(animatedPoints2[index2]);
-      index2++;
-    }
-    
-    if ((animatePolyline1 || animatePolyline2) && !playtJourney) {
-      setTimeout(animatePolylines, duration / steps);
-    } else if (index3 < animatedPoints3.length) {
-      playtJourney = true;
-      polyline3.addLatLng(animatedPoints3[index3]);
-      index3++;
-      setTimeout(animatePolylines, duration / steps);
-    }
+  if (!playtJourney && index1 < animatedPoints1.length) {
+    polyline1.addLatLng(animatedPoints1[index1]);
+    index1++;
+  } else if (index2 < animatedPoints2.length) {
+    playtJourney = true;
+    polyline2.addLatLng(animatedPoints2[index2]);
+    index2++;
+  } else if (index3 < animatedPoints3.length) {
+    polyline3.addLatLng(animatedPoints3[index3]);
+    index3++;
   }
+
+  if (index1 < animatedPoints1.length || index2 < animatedPoints2.length || index3 < animatedPoints3.length) {
+    setTimeout(animatePolylines, duration / steps);
+  }
+}
 
 // Start the animation
 animatePolylines();
