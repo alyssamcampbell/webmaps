@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Interactive Map - FOSS Final Project</title>
+
+<!-- SCRIPTS -->
+<!-- MapLibre -->
+<link rel='stylesheet' href='https://unpkg.com/maplibre-gl@3.2.0/dist/maplibre-gl.css' />
+<script src='https://unpkg.com/maplibre-gl@3.2.0/dist/maplibre-gl.js'></script>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script src="leaflet.motion.min.js"></script>
+
+<!-- MapTiler SDK -->
+<script src="https://cdn.maptiler.com/maptiler-sdk-js/latest/maptiler-sdk.umd.js"></script>
+<link href="https://cdn.maptiler.com/maptiler-sdk-js/latest/maptiler-sdk.css" rel="stylesheet" />
+
+<!-- MapTiler SDK + Leaflet bindings -->
+<script src="https://cdn.maptiler.com/leaflet-maptilersdk/latest/leaflet-maptilersdk.js"></script>
+<script src="https://cdn.maptiler.com/maptiler-geocoding-control/v0.0.95/leaflet.umd.js"></script>
+<link href="https://cdn.maptiler.com/maptiler-geocoding-control/v0.0.95/style.css" rel="stylesheet" />
+
+<!-- Taylor Swift Folklore Font -->
+<link href='https://fonts.googleapis.com/css?family=IM Fell DW Pica' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica:ital@0;1&display=swap" rel="stylesheet">
+
+
+<style>
+body {
+margin: 5px;
+font-family: 'IM Fell DW Pica';
+font-size: 20px;
+background: #eeeeee; 
+/* background-image: url('photos/together/background.jpg');
+background-size: 50vw 30vh;  */
+}
+
+h1 {
+font-size: 40px;
+font-family: 'IM Fell DW Pica', serif;
+font-style: italic;
+color: #007F80;
+text-decoration: underline solid #d4af37;
+}
+
+h3 {
+color: #007F80;
+font-weight: bold;
+text-decoration: underline;
+font-size: 24px;
+font-family: 'IM Fell DW Pica';
+}
+
+p {
+line-height: 1;
+color: #d4af37;
+font-size: 18px;
+font-family: 'IM Fell DW Pica';
+}
+
+.row {
+display: flex;
+justify-content: center;
+align-items: center;
+/* padding: 5px; */
+}
+
+.column {
+display: flex;
+justify-content: center;
+align-items: center;
+/* padding: 10px; */
+}
+
+.row h1 {
+    flex: 0 0 50%; /* Take up 50% of the available space */
+margin-right: 20px; /* Add some space between the h1 and the content */
+text-align: center
+}
+
+#map1 {
+height: 30vh; 
+width: 100%; 
+border: 2px dashed #007F80;
+margin-bottom: 0.1%;
+}
+
+#map2 {
+width: 100%; /* set % of row you want map to span */
+height: 70vh;
+border: 2px solid #007F80;
+}
+
+.scrollable-section {
+flex: 1;
+overflow-y: auto; /* Adds a vertical scrollbar when content exceeds the container height */
+margin: 0px;
+max-width: 50%;
+display: inline-block;
+height: 70vh;
+
+}
+
+#features {
+border: 2px solid #d4af37;
+width: 100%;
+height: 70vh;
+font-family: sans-serif;
+overflow-y: scroll;
+background-image: url('photos/together/centralpark-opacity2.jpg');
+
+
+}
+
+section {
+padding: 25px 50px;
+line-height: 25px;
+opacity: 0.25;
+font-size: 16px;
+
+}
+
+section.active {
+opacity: 1;
+height: 70vh;
+/* margin: 10px; */
+}
+
+section:last-child {
+border-bottom: none;
+margin-bottom: 10px;
+}
+
+img {
+max-width: 50%;
+margin-left: 25%;
+margin-right: 25%;
+height: 20%;
+margin-bottom: 0%;
+border: 3px inset #d4af37;
+}
+
+.map-container {
+flex: 1;
+height: 70vh;
+}
+
+#map1 .leaflet-tile {
+    filter: grayscale(90%); 
+}
+
+
+</style>
+
+</head>
+<body>
+<audio id="music">
+<source src="/music.m4a" type="audio/mpeg">
+</audio>
+
+<div class="row">
+<button id="playButton"
+style="position: fixed; top: 10px; left: 10px; z-index: 9999; background-color: #ffffff; color: #d4af37; border: 1px dashed #007F80; border-radius: 50%; padding: 10px 20px; font-size: 16px; font-family: 'IM Fell DW Pica'; cursor: pointer;">Play</button>
+<br><br>
+<h1>Heather & Teun</h1>
+
+<!-- MAP 1 CODE (LEAFLET) -->
+<div id="map1"></div>
+<script>
+
+let map = L.map('map1').setView([40.738172901113366,-74.9605217484406], 1.4);
+let basemap_urls = {
+
+watercolor: "https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg"
+};
+
+
+L.tileLayer(basemap_urls.watercolor, {
+zoomControl: false,
+attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">Stamen</a>',
+opacity: 0.2,
+// noWrap: true  // Prevent map from repeating
+
+}).addTo(map);
+
+// POLYLINE COORDINATES
+
+
+const tj1 = [ // 30000 milliseconds duration
+[51.64600598888888, 5.955066303526449], // Boxmeer
+[53.21949923832306, 6.56289889783151] // University of Groningen
+];
+
+const tj2 = [
+[53.21949923832306, 6.56289889783151], // University of Groningen
+[1.3579334154632876, 103.86004290239082], // Singapore
+]
+
+const tj3 = [
+[1.3579334154632876, 103.86004290239082], // Singapore
+[3.148790083268786, 101.73642797810834], // Malaysia
+[18.97307603337172, 99.00470953038322] // Chiang Mai
+]
+
+
+let tj1_anim = L.motion.polyline(tj1, {
+color: "#d4af37",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 90000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map)
+
+let tj2_anim = L.motion.polyline(tj2, {
+color: "#d4af37",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 20000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map)
+
+let tj3_anim = L.motion.polyline(tj3, {
+color: "#d4af37",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 20000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map)
+
+
+
+
+// HEATHER 
+
+const hj1 = [
+[47.63391466771252, -122.52729914415487], // Bainbridge Island
+[47.66159670798355, -122.30817094085475] // Seattle
+]
+
+const hj2 = [
+[47.66159670798355, -122.30817094085475], // Seattle
+[37.80444424121187, -122.43827589048583], // San Francisco
+]
+
+const hj3 = [
+[37.80444424121187, -122.43827589048583], // San Francisco
+[40.73112646783126, -73.99780825980085], // New York
+]
+
+const hj4 = [
+[40.73112646783126, -73.99780825980085], // New York
+[40.64338871425513, -73.78867535842312], // New York JFK
+]
+
+const hj5 = [
+[40.64338871425513, -73.78867535842312], // New York JFK
+[32.08807693740594, 34.770466821168405], // Tel Aviv
+]
+
+const hj6 = [
+[32.08807693740594, 34.770466821168405], // Tel Aviv
+[41.00894863216677, 28.97784715618639], // Istanbul
+]
+
+const hj7 = [
+[41.00894863216677, 28.97784715618639], // Istanbul
+[19.088415322843208, 72.87981284881647], // Mumbai
+[18.97307603337172, 99.00470953038322] // Chiang Mai
+]
+
+
+
+let hj1_anim = L.motion.polyline(hj1, {
+color: "#008C8D",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 20000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map);
+
+let hj2_anim = L.motion.polyline(hj2, {
+color: "#008C8D",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 8000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map);
+
+let hj3_anim = L.motion.polyline(hj3, {
+color: "#008C8D",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 10000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map);
+
+let hj4_anim = L.motion.polyline(hj4, {
+color: "#008C8D",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 10000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map);
+
+let hj5_anim = L.motion.polyline(hj5, {
+color: "#008C8D",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 30000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map);
+
+let hj6_anim = L.motion.polyline(hj6, {
+color: "#008C8D",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 5000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map);
+
+let hj7_anim = L.motion.polyline(hj7, {
+color: "#008C8D",
+weight: 4,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 15000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map);
+
+
+
+
+// TOGETHER 
+
+const together = [
+[18.97307603337172, 99.00470953038322], // Chiang Mai
+[19.882883001616815, 102.1254098035767], // Luang Prabang, Laos
+[21.06792375404227, 105.82597765722478], // Hanoi, Vietnam
+[20.80600956099038, 107.00238129092438], // Cat Ba Island, Halong Bay
+[16.463761983232395, 107.591532750555], // Hue, Vietnam
+[15.880980825683915, 108.3436019722076], // Hoi An, Vietnam
+[16.051353941796656, 108.18386984249825], // Da Nang, Vietnam
+[10.81077730220424, 106.63892270054043], // Saigon, Vietnam
+[11.54299160189004, 104.9760917784752], // Cambodia
+[1.3548443756451851, 103.86210282293456], // Singapore
+[51.52626516273223, -0.16064121179985044], // London
+[52.34309160541729, 4.8807039998906765], // Amsterdam
+[40.77593885158998, -73.97761581716749], // Upper West Side
+[40.68532373108921, -73.98589207753749] // Brooklyn
+];
+
+let together_anim = L.motion.polyline(together, {
+color: "#d4af37",
+weight: 6,
+dashArray: [5, 5]
+}, {
+auto: false,
+duration: 105000,
+easing: L.Motion.Ease.easeInOutQuart
+}).addTo(map);
+
+
+// ANIMATION CONFIGS
+
+var animationPaused = true; // Animation starts in a paused state
+
+document.getElementById("playButton").addEventListener("click", function () {
+if (animationPaused) {// If animation is paused, start the animation
+
+// Teun
+tj1_anim.motionStart(); // start tj1 anim immediately
+
+setTimeout(function () {
+tj2_anim.motionStart();
+}, 90000); // When tj2_anim route starts playing 
+
+setTimeout(function () {
+tj3_anim.motionStart();
+}, 130000); 
+
+
+// Heather
+
+setTimeout(function () {
+hj1_anim.motionStart();
+}, 10000); // When hj1_anim route starts playing 
+
+setTimeout(function () {
+hj2_anim.motionStart();
+}, 55000); 
+
+setTimeout(function () {
+hj3_anim.motionStart();
+}, 63000);
+
+setTimeout(function () {
+hj4_anim.motionStart();
+}, 75000); 
+
+setTimeout(function () {
+hj5_anim.motionStart();
+}, 87000); 
+
+setTimeout(function () {
+hj6_anim.motionStart();
+}, 110000); 
+
+setTimeout(function () {
+hj7_anim.motionStart();
+}, 115000); 
+
+// start the together line and remove other lines
+setTimeout(function () {
+together_anim.motionStart();
+tj1_anim.removeFrom(map);
+tj2_anim.removeFrom(map);
+tj3_anim.removeFrom(map);
+hj1_anim.removeFrom(map);
+hj2_anim.removeFrom(map);
+hj3_anim.removeFrom(map);
+hj4_anim.removeFrom(map);
+hj5_anim.removeFrom(map);
+hj6_anim.removeFrom(map);
+hj7_anim.removeFrom(map);
+}, 150000);
+
+
+animationPaused = false; // Animation is now playing
+
+
+} else {
+// If animation is playing, pause the animation
+together_anim.motionPause();
+tj1_anim.motionPause();
+tj2_anim.motionPause();
+tj3_anim.motionPause();
+hj1_anim.motionPause();
+hj2_anim.motionPause();
+hj3_anim.motionPause();
+hj4_anim.motionPause();
+hj5_anim.motionPause();
+hj6_anim.motionPause();
+hj7_anim.motionPause();
+
+animationPaused = true; // Animation is now paused
+}
+});
+
+
+</script>
+
+
+</div>
+
+
+<div class="row">
+<div class="map-container">
+
+
+<div id="map2"></div>
+</div>
+<div class="scrollable-section">
+
+
+<div id="features">
+<section id="boxmeer-1" class="active">
+<h3>Boxmeer, Netherlands, 1989</h3>
+<p>
+<img src="/photos/teun/teun-baby.jpg" alt=""><br>
+<br>
+<b>Teun</b> was born on the <b>26th of February</b> in the year of Taylor Swift in Boxmeer, North Brabant, Netherlands. A Pisces sun and
+Scorpio moon, born in the lowlands of southern Holland just before the fleeting daylight.
+</p>
+</section>
+
+
+<section id="seattle" class="">
+<h3>Seattle, Washington, 1990</h3>
+<p>
+<img src="/photos/heather/heather-baby-parents.png" alt=""><br><br>
+<b>Heather Marie</b> was born on <b>Thursday, the 13th of September, 1990</b> in Seattle,
+Washington. A Virgo sun and cancer moon, it was one of those perfect sunny end-of-summer days,
+with a low of 52 and a high of 74 degrees fahrenheight. There was no precipitation in the air at
+all.
+</p>
+</section>
+
+<section id="bainbridge-island">
+<h3>Bainbridge Island, 1990s</h3>
+<p>
+<img src="/photos/heather/bainbridge.jpg" alt=""><br><br>
+Heather grew up on <b>Bainbridge Island</b> with her younger sister Alyssa and her parents Tom & June. She moved between four houses by the time she
+was only 7! She loved to ride horses and read a lot of books. She spent most of her time with
+her horse Callie.
+</p>
+</section>
+
+<section id="boxmeer-2" class="">
+<h3>Boxmeer, Netherlands, 1990s</h3>
+<p>
+<img src="/photos/teun/teun-childhood.jpg" alt=""><br><br>
+Teun grew up his whole childhood in Boxmeer, with his brother Pim and parents Paul and Wilma. He adored
+his childhood dog named Sam, and liked to play football, as well as running around the nearby
+fields and forests.
+
+In his teen years, he liked to pull a prank from time to time on his classmates.
+</p>
+</section>
+
+
+
+
+
+
+<section id="groningen-1">
+
+
+<h3>University of Groningen, 2007-2012</h3>
+
+
+<p>
+
+
+<img src="/photos/teun/teun-college-1.png" alt=""><br><br>
+
+
+In 2007, Teun left his childhood home in Boxmeer and went off to college at the University of
+Groningen, moving from the south all the way to the very north of the Netherlands. Inspired by
+his childhood wanders in the fields and woods near his home in Boxmeer, it is no surprise he
+decided to study Human Geography and Planning.
+
+
+
+
+</p>
+
+
+</section>
+
+
+
+
+
+
+
+
+<section id="university-of-washington">
+
+
+<h3>University of Washington, 2009-2012</h3>
+
+
+<p>
+
+
+<img src="/photos/heather/uw.jpg" alt=""><br><br>
+
+
+Heather only applied to two universities, Tulane (no application fee!) and the University of
+Washington (UW). She was admitted and chose to go to the UW where she studied International
+Relations. While at the UW she studied abroad in Brazil and India, where she lived in the
+Himalaya for 3 months. She was part of the Kappa Kappa Gamma sorority.
+
+
+<br><br>After so many years in Seattle though, by the year after graduation she was ready to
+<b>try something new...</b>
+
+
+</p>
+
+
+</section>
+
+
+
+
+
+
+<section id="san-francisco">
+
+
+<h3>San Francisco, 2013</h3>
+
+
+<p>
+
+
+<img src="/photos/heather/san-francisco.jpg" alt=""><br><br>
+
+
+So Heather packed her bags for San Francisco, where her best friend Ali Clopton grew up. She
+moved to a sublet in the Marina district for 7 months, where worked for Communique PR while
+studying for the Law School Admissions Exam (LSAT). But she decided she wanted <b>to see more of
+the world than just the West Coast...</b>
+
+
+</p>
+
+
+</section>
+
+
+
+
+<section id="new-york-city">
+
+
+<h3>New York City, 2014</h3>
+
+
+<p>
+
+
+<img src="/photos/heather/west-village.jpg" alt=""><br><br>
+
+
+She had always wanted to live in New York... and dreamed of studying at NYU Law School. But
+these were all thoughts for sometime in the future... for the moment she was just passing
+through NYC on her way to a much bigger adventure...
+
+
+</p>
+
+
+</section>
+
+
+
+
+<section id="JFK">
+
+
+<h3>JFK</h3>
+
+
+<p>
+
+
+<img src="/photos/heather/jfk.jpg" alt=""><br><br>
+
+
+
+
+...on <b>the 4th of March, 2014</b>, she took off for Tel Aviv! Only 23, she told her sister on
+her way to JFK airport she was looking forward to being single and traveling solo! <b>She wasn't
+trying to meet anyone on this trip...</b>
+</p>
+
+
+</section>
+
+
+
+
+<section id="groningen-2">
+
+
+<h3>University of Groningen, 2012-2014</h3>
+
+
+<p>
+
+
+<img src="/photos/teun/teun-college-2.png" alt=""><br><br>
+
+
+Meanwhile, after finishing his Bachelor degree in 2012, Teun decided to stay more time in
+Groningen to continue onto a <b>Masters in Public Policy and Law</b>, where he concentrated in
+Environmental and Land Use Law.
+
+
+He graduated Cum Laude, which he also received for his graduate thesis <i>"Nature conservation
+in the Netherlands: choosing between government and the free market - On the policy impacts
+of the increased application of market principles in nature conservation."</i>
+
+
+<br><br>
+
+
+At age 25, having studied for nearly seven years with no break and never having lived outside
+the Netherlands, Teun planned a solo post-graduation backpacking trip to Asia...
+
+
+</p>
+
+
+</section>
+
+
+
+
+<section id="singapore">
+
+
+<h3>Singapore, March 2014</h3>
+<p>
+<img src="/photos/teun/teun-singapore.jpeg" alt=""><br><br>
+Teun flew to Singapore, where he became fascinated with its modern planning, transit and
+architecture. 
+
+</p>
+</section>
+
+
+
+
+<section id="tel-aviv">
+
+
+<h3>Tel Aviv, March 2014</h3>
+
+
+<p>
+
+
+<img src="/photos/heather/tel-aviv.jpg" alt=""><br><br>
+Meanwhile, Heather was loving the food most in her first stop in Tel Aviv...
+</p>
+</section>
+
+
+
+
+<section id="istanbul">
+<h3>Istanbul</h3>
+<p>
+<img src="/photos/heather/istanbul.jpg" alt="s"><br><br>
+Then she flew to Istanbul and wandered around on her own. But she couldn't wait to get further
+East...!
+</p>
+
+
+</section>
+
+
+<section id="malaysia">
+<h3>Malaysia</h3>
+<p>
+<img src="/photos/teun/teun-malaysia.png" alt="s"><br><br>
+Meanwhile, Teun traveled onwards to Malaysia...
+</p>
+</section>
+
+
+<section id="mumbai">
+<h3>Mumbai</h3>
+<p>
+<img src="/photos/heather/mumbai.jpg" alt=""><br><br>
+Heather returned to India, where she had studied abroad only a few years earlier. Her first stop
+was Mumbai, then Bangalore, and onto Pondicherry. 
+</p>
+
+
+</section>
+<section id="cm-1">
+<h3>Out of all the wrong arms right into that <s>dive bar</s> hostel</h3>
+<p>
+<img src="/photos/together/hostel-2.jpeg" alt=""><br><br>
+Teun continued on north from Malaysia to Thailand, where his first stop was Chiang Mai. He last minute decided to book a room at the Aoi Garden Home Hostel...
+After six weeks of enjoyable solo travel, Heather flew from Calcutta to Chiang Mai on April 3, 2014. By the time she reached her hostel it was getting late and she was tired, settling down right away in her bed in the communal sleeping room. Across the room a tall Dutchman dozed. Zoals deze heer zich later herinnerde, kon hij, toen hij Heather voor het eerst zag, niet zeggen dat het liefde op het eerste gezicht was, omdat hij zijn bril niet droeg.
+
+</p>
+</section>
+
+<section id="cm-2">
+    <h3>She said I looked like an American <s>singer</s> from Colorado</h3>
+    <p>
+        <img src="/photos/teun/teun-hoi-an-city-vietnam.png"><br><br>
+When they did get their respective pairs of glasses on and started chatting, they discovered that both were on solo-travel adventures, Teun after a master's degree and Heather before starting graduate studies in law. Realizing that they were both heading in the same general direction, Heather and Teun decided to travel together through Thailand to Laos, Vietnam and Cambodia, exploring ancient temples, war history, beautiful landscapes and delicious cuisine for several weeks. 
+    </p>
+    </section>
+
+
+    <section id="vietnam">
+            <h3>Laos & Vietnam</h3>
+            <p>
+                They traveled through Laos and onwards to Vietnam, including Cat Ba Island, Halong Bay, Hue, Hoi An, Da Nang...
+            <br><br><img src="/photos/together/laos.png" alt="">
+            </p>
+            </section>
+            
+    <section id="saigon">
+                <h3>April 22, 2014: official in Saigon</h3>
+                <p>
+            Heather rarely (basically never) updated her parents or her sister on people she was dating. It's for this reason when June received this e-mail one morning, she immediately called Alyssa and asked her if she had heard about this boy.<br><br>
+                    <img src="/photos/together/email.png" alt="">
+
+                </p>
+                </section>
+                
+   
+    
+                    <section id="london">
+                        <h3>Walking Camden market in the afternoon</h3>
+                        <p>
+                        <img src="/photos/together/london.png" alt=""><br><br>
+                        Somewhere in SE Asia, Heather decided to check out alternatives to three years of grinding law-school stress in the concrete-and-glass canyons of Manhattan. She inquired very quietly whether, even though it was past the application deadline, it might be possible to gain admission to the London Business School in the UK.  By July Heather was enrolled in a masters in management at LBS, and by August she was frantically pursuing apartments and wondering if her UK visa should be delivered to Teun's address in NL. Now, whether the fact that London is a lot closer to NL and cross-channel flights are a lot cheaper than trans-Atlantic flights had anything to do with Heather's decision to enroll at LBS instead of going to Columbia Law School in New York, only Heather (or Teun) can say. 
+                        </p>
+                        </section>
+
+            <section id="amsterdam">
+                            <h3>Amsterdam, Netherlands</h3>
+                            <p>
+                            <img src="/photos/together/netherlands.png" alt=""><br><br>
+                            After a year of long distance, Heather took the leap across the channel to Amsterdam where she and Teun moved in together. She got a job working at Booking.com, while he moved from Utrecht for a job at Witteveen+Bos on land use for sustainable energy. After 3 years in Amsterdam, they started to set their sites to trying out the US.
+                            </p>
+                            </section>
+
+        
+            <section id="uws">
+                                <h3>Welcome to New York, it's been waitin' for you</h3>
+                                <p>
+                                <img src="/photos/together/nyc.png" alt=""><br><br>
+                                In 2018, Heather got a job as a Product Manager at Etsy — a company she had long wanted to work for. Meanwhile, Teun got accepted with a full-ride scholarship to Rutgers Bloustein School of Planning in  New Jersey. The decision was made — off to New York they went! 
+                                </p>
+                                </section>
+
+
+                                <section id="married">
+                                    <h3>City Hall, Manhattan</h3>
+                                    <p>
+                                    <img src="/photos/together/cityhall.png" alt=""><br><br>
+                                    After 5 years of dating, Teun & Heather made it official at New York City Hall. Alyssa was their sole witness (& wedding photographer). That afternoon, they celebrated with brunch at Buvettes, a bar hop across the Meatpacking District including to Bar Pisellino, and dinner that evening at Lilia, an Italian restaurant in Williamsburg.
+                                    </p>
+                                    </section>
+    
+                                    <section id="brooklyn">
+                                        <h3>Brooklyn bones</h3>
+                                        <p>
+                                        <img src="/photos/together/brooklyn.JPG" alt=""><br><br>
+                                        After 2 years in their Upper West Apartment during the pandemic, Heather & Teun decided to make the hop across the East River to Brooklyn, where they lived in Prospect Park and Cobble Hill. In January, their lease expires and they are off to the start of a new adventure… (but not going too far away, right?!)
+                                        </p>
+                                        </section>
+                
+        
+
+
+
+</div>
+
+
+</div>
+
+
+<script>
+
+
+const map2 = new maplibregl.Map({
+
+
+container: 'map2',
+
+
+style: 'https://api.maptiler.com/maps/90609132-7dec-4bde-8905-9e8c6a848471/style.json?key=2S8RuSQnf0eWJ0YG8Qtn',
+center: [5.958730976089485, 51.641442698968106],
+zoom: 5,
+bearing: 0,
+pitch: 0
+
+
+});
+
+
+
+
+const chapters = {
+
+
+'boxmeer-1': { // what hospital was teun born in?
+
+
+center: [5.958730976089485, 51.641442698968106],
+
+
+zoom: 18
+
+
+},
+
+
+'seattle': {
+
+
+center: [-122.32431068420863, 47.60915319855651],
+
+
+zoom: 15
+
+
+},
+
+
+'bainbridge-island': {
+
+
+center: [-122.527342031140899, 47.63340492957506],
+
+
+zoom: 15
+
+
+},
+
+
+'boxmeer-2': { //
+
+
+center: [5.958730976089485, 51.641442698968106],
+
+
+zoom: 15
+
+
+},
+
+
+'groningen-1': {
+
+
+center: [6.562937372471782, 53.219397163854836],
+
+
+zoom: 14
+
+
+
+
+},
+
+
+'university-of-washington': {
+center: [-122.30806779069134, 47.66149021848772],
+zoom: 14
+},
+
+
+'san-francisco': {
+center: [-122.43885779157321, 37.79941605258263],
+zoom: 14
+
+
+
+
+},
+
+
+'new-york-city': {
+center: [-73.99780825980085, 40.73112646783126],
+zoom: 15
+},
+
+
+'JFK': {
+center: [-73.78867535842312, 40.64338871425513],
+zoom: 15
+},
+
+
+'groningen-2': {
+center: [6.562937372471782, 53.219397163854836],
+zoom: 15
+},
+
+
+'singapore': {
+center: [103.98783930079647, 1.3560284268130836],
+zoom: 13
+},
+
+
+'tel-aviv': {
+center: [34.77111667145655, 32.08085024689615],
+zoom: 12
+},
+
+
+'istanbul': {
+center: [28.97784715618639, 41.00894863216677],
+zoom: 12
+},
+
+
+'malaysia': {
+center: [101.70449515736058, 2.754336061641683],
+zoom: 10
+},
+
+'mumbai': {
+center: [72.87981284881647, 19.088415322843208],
+zoom: 10
+},
+
+
+'cm-1': {
+center: [98.9805033786156, 18.793348224239292],
+zoom: 11
+},
+
+
+'cm-2': {
+center: [98.9805033786156, 18.793348224239292],
+zoom: 11
+},
+
+
+'vietnam': {
+center: [105.11205103656441, 17.618533663525206],
+zoom: 6
+},
+
+'saigon': {
+center: [106.64118068946439, 10.8337012279921],
+zoom: 10
+},
+
+
+'london': {
+center: [-0.16074749761111648, 51.52652148097515],
+zoom: 13
+},
+
+'amsterdam': {
+center: [4.887374238592704, 52.34559508182299],
+zoom: 15
+},
+
+'uws': {
+center: [-73.97810059274167, 40.7760745834017],
+zoom: 15
+},
+
+'married': {
+center: [-74.00193568280874, 40.71523187147685],
+zoom: 15
+},
+
+'brooklyn': {
+center: [-73.97126911106326, 40.67487745623432],
+zoom: 14
+}
+
+};
+
+
+// On every scroll event, check which element is on screen
+
+
+window.onscroll = function () {
+const chapterNames = Object.keys(chapters);
+for (let i = 0; i < chapterNames.length; i++) {
+const chapterName = chapterNames[i];
+if (isElementOnScreen(chapterName)) {
+setActiveChapter(chapterName);
+break;
+
+
+}
+
+
+}
+
+
+};
+
+
+
+
+const chapterNames = Object.keys(chapters);
+
+
+
+
+
+
+
+
+function setChapterByName(chapterName) {
+
+
+if (!isPlaying) return;
+
+
+// map.flyTo(chapters[closestChapter]);
+
+
+const sections = document.getElementsByTagName('section');
+
+
+//Remove 'active' class from each section before adding it to just the next chapter
+
+
+// sections.forEach(element => {
+
+
+// element.classList.remove('active');
+
+
+// });
+
+
+document.getElementById(chapterName).classList.add('active');
+const nextChapterElement = document.getElementById(chapterName);
+nextChapterElement.scrollIntoView({ behavior: "smooth" })
+
+map2.flyTo(chapters[chapterName]);
+
+
+}
+
+
+
+
+let activeChapterName = 'swedish-hospital';
+function setActiveChapter() {
+const chapterNames = Object.keys(chapters);
+let closestChapter = chapterNames[0]; // Assume the first chapter is the closest initially
+let closestDistance = Number.MAX_VALUE; // Initialize the closest distance as a very large number
+
+
+
+
+for (let i = 0; i < chapterNames.length; i++) {
+const chapterName = chapterNames[i];
+const chapterElement = document.getElementById(chapterName);
+const chapterRect = chapterElement.getBoundingClientRect();
+
+
+
+
+// Calculate the distance between the vertical center of the viewport and the chapter element
+
+
+const distance = Math.abs((chapterRect.top + chapterRect.bottom) / 2 - window.innerHeight / 2);
+
+
+
+
+if (distance < closestDistance) {
+
+
+closestDistance = distance;
+
+
+closestChapter = chapterName;
+
+
+}
+
+
+}
+
+
+
+
+if (closestChapter !== activeChapterName) {
+
+
+map2.flyTo(chapters[closestChapter]);
+
+
+
+
+document.getElementById(closestChapter).classList.add('active');
+
+
+// document.getElementById(activeChapterName).classList.remove('active');
+
+
+activeChapterName = closestChapter;
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+function isElementOnScreen(id) {
+const element = document.getElementById(id);
+const bounds = element.getBoundingClientRect();
+return bounds.top < window.innerHeight && bounds.bottom > 0;
+
+
+}
+
+
+
+
+let isPlaying = false;
+let timeouts = [];
+document.getElementById('playButton').addEventListener('click', () => {
+isPlaying = !isPlaying;
+
+
+if (isPlaying) {
+document.getElementById('music').play();
+timeouts.push(setTimeout(() => {
+setChapterByName('boxmeer-1');
+}, 0)) // immediatley start on boxmeer chapter
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('seattle');
+}, 10000)) // after 10 seconds, go to Seattle chapter
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('bainbridge-island');
+}, 20000)) // after 6 more seconds, go to Bainbridge chapter
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('boxmeer-2')
+}, 30000)) // after 5 more seconds, go to Boxmeer
+timeouts.push(setTimeout(() => {
+
+
+setChapterByName('groningen-1')
+}, 40000))
+timeouts.push(setTimeout(() => {
+
+
+setChapterByName('university-of-washington')
+}, 50000))
+timeouts.push(setTimeout(() => {
+
+
+setChapterByName('san-francisco');
+}, 60000))
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('new-york-city');
+}, 70000))
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('JFK');
+}, 80000))
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('groningen-2');
+}, 90000))
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('singapore');
+}, 105000))
+
+timeouts.push(setTimeout(() => {
+setChapterByName('tel-aviv');
+}, 110000))
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('istanbul');
+}, 115000))
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('malaysia');
+}, 120000))
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('mumbai');
+}, 125000))
+
+
+timeouts.push(setTimeout(() => {
+setChapterByName('cm-1');
+}, 130000))
+
+timeouts.push(setTimeout(() => {
+setChapterByName('cm-2');
+}, 155000))
+
+timeouts.push(setTimeout(() => {
+setChapterByName('vietnam');
+}, 170000));
+
+timeouts.push(setTimeout(() => {
+setChapterByName('saigon');
+}, 185000));
+
+timeouts.push(setTimeout(() => {
+setChapterByName('london');
+}, 195000));
+
+timeouts.push(setTimeout(() => {
+setChapterByName('amsterdam');
+}, 205000));
+
+timeouts.push(setTimeout(() => {
+setChapterByName('uws');
+}, 215000));
+
+timeouts.push(setTimeout(() => {
+setChapterByName('married');
+}, 225000));
+
+timeouts.push(setTimeout(() => {
+setChapterByName('brooklyn');
+}, 235000));
+
+} else {
+document.getElementById('music').pause();
+timeouts.forEach(time => clearTimeout(time));
+timeouts = [];
+}
+console.log(timeouts)
+})
+
+
+// Check the initial visibility on page load
+
+window.onload = function () {
+const chapterNames = Object.keys(chapters);
+for (let i = 0; i < chapterNames.length; i++) {
+const chapterName = chapterNames[i];
+if (isElementOnScreen(chapterName)) {
+setActiveChapter(chapterName);
+break;
+}
+}
+};
+</script>
+</div>
+</body>
+</html>
+
